@@ -1,0 +1,158 @@
+#!/bin/bash
+
+usuarioApp="UsuarioApp"
+nombreGrupo="groupApp"
+
+instalar() {
+
+    echo "Donde quieres instalar el programa $archivo"
+    read direccion
+    if [ -d $direccion ]
+    then
+        echo "Directorio ya existe"
+        
+    else
+        echo "El directorio no existe lo creo"
+        mkdir $direccion
+    fi
+    
+    rutaDirectorio="/home/juan/Documents/Sistemas/$direccion"
+
+    rutaDirectorio2="/home/juan/Documents/Sistemas/$direccion/"
+
+    cp pizarra.class $rutaDirectorio
+
+    resultNombre=$(grep $usuarioApp /etc/passwd)
+    resultGrupo=$(grep $nombreGrupo /etc/group)
+
+    if [ ${#resultNombre} -eq 0 ]; then
+        echo "El usuario $usuarioApp no existe, pero se crea"
+        sudo useradd -d /home/juan/Documents/Sistemas/$direccion -s /bin/bash UsuarioApp  
+        sudo chown -R $usuarioApp $rutaDirectorio   
+    else
+        echo "El usuario $usuarioApp existe"
+    fi
+    if [ ${#resultGrupo} -eq 0 ]; then
+        echo "El grupo $nombreGrupo no existe, pero se crea"
+        sudo groupadd groupApp 
+        sudo usermod -aG $nombreGrupo $usuarioApp  
+    else
+        echo "El grupo $grupoApp existe"
+    fi
+
+    echo "Instalamos el paquete JRE o actualizamos"
+    sudo apt install default-jre #Sirve para ejecuatarlo
+   
+}
+
+ejecutar(){
+    let flag=0
+    let archivo
+    while [ $flag -eq 0 ]; do 
+        echo "Que archivo quieres ejecutar:"
+        read archivo
+        if [ -e $archivo ]
+        then
+            echo "Archivo: $archivo"
+            flag=1
+        else
+            echo "El archivo no existe."
+        fi
+    done
+
+    let flagColor=0
+    let color
+    
+    while [ $flagColor -eq 0 ]; do
+        echo "En que color quieres imprimirlo \"R\" para rojo, \"G\" para verde y \"Y\" para amarillo"
+        read color
+        case "$color" in
+
+            'R' | 'r') 
+                java pizarra $archivo R 
+                flagColor=1
+                ;;
+            'G' | 'g')
+                java pizarra $archivo G
+                flagColor=1
+                ;;
+            'Y' | 'y') 
+                java pizarra $archivo Y
+                flagColor=1
+                ;;
+            *)
+                echo "El valor que metiste no es correcto"
+            ;;
+        esac
+
+    done
+}
+
+
+desinstalar(){
+    let flag=0
+
+    while [ $flag -eq 0 ]; do
+        echo "Seguro que quieres desinstalar el programa?(Y/n)"
+        read opcion
+        if [ "$opcion" == "Y" ] || [ "$opcion" == "y" ];
+        then
+            echo "Borramos usuario y su grupo"
+            sudo userdel -r $usuarioApp
+            sudo groupdel $nombreGrupo
+
+            flag=1
+        else
+            echo "No furula"
+        fi
+    done
+    flag=0
+    while [ $flag -eq 0 ]; do
+        echo "Quieres desinstalar el paquete default-jre?(Y/n)"
+        read opcion
+        if [ "$opcion" == "Y" ] || [ "$opcion" == "y" ];
+        then
+            sudo apt remove default-jre
+            echo "Desinstalacion terminada"
+            flag=1
+        else
+            echo "Desinstalacion terminada"
+        fi
+    done
+    
+}
+
+
+
+case "$1" in
+
+    '-i') 
+        instalar
+        ;;
+    '-e')
+        ejecutar      
+        ;;
+    '-u') 
+        desinstalar
+        ;;
+    '-HELP') 
+        echo "-i : Para instalacion, en la cual pide el directorio en el que se va a instalar el programa, se creara un usuario y grupo para la ejecucion del mismo. 
+     Se copia el archivo.class en el directorio que se ha pasado anteriormente. Se instala o actualiza el paquete default-jre para la ejecucion del programa.
+     "
+        
+        echo "-e : Para la ejecucion del programa, se pide un archivo de texto al usuario y se pide una opcion de color al usuario \"R\" para rojo, \"G\" para verde,
+     \"Y\" para amarillo. Y el programa mostrara el contenido del fichero de texto en el color deseado.
+     "
+        echo "-u : Para desinstalar borramos el usuario creado y el grupo, con ello se elimina el directorio del programa ques es el home de dicho usuario. Se da la
+     opcion de desinstalar el jre si lo desea.
+     "
+        ;;
+    *)
+        echo "-i : Para instalacion "
+        echo "-e : Para la ejecucion del programa"
+        echo "-u : Para desinstalar"
+        echo "-HELP : Para mas informacion"
+    ;;
+    
+
+esac
