@@ -2,6 +2,8 @@
 Sistemas Informaticos
 
 
+El programa consiste en tres opciones, una para instalarlo, otra para ejecutar, y otra para desinstalarlo. La ejecucion consiste en la impresion de un documento de texto por pantalla de un color especifico, rojo, verde y amarillo.
+
 La funcion instalar que seria con el parametro "-i" : Para instalacion, en la cual pide el directorio en el que se va a instalar el programa, se creara un usuario y grupo para la ejecucion del mismo. Se copia el archivo.class en el directorio que se ha pasado anteriormente. Se instala o actualiza el paquete default-jre para la ejecucion del programa.
      
         
